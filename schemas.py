@@ -8,9 +8,11 @@ class NoParams(BaseModel):
     pass
 
 class ConnectParams(BaseModel):
-    label: str = Field(default="", description="Friendly connection label, e.g. Acme Odoo Accounting.")
-    api_key: str = Field(description="Accounting API Key / OAuth Access Token.")
-    base_url: str = Field(default="", description="Optional custom base URL or instance domain.")
+    label: str = Field(default="", description="Friendly connection label, e.g. Acme Odoo ERP.")
+    url: str = Field(description="Odoo instance URL (e.g. https://mycompany.odoo.com or self-hosted).")
+    db: str = Field(description="Odoo database name.")
+    username: str = Field(description="Odoo user email or login.")
+    api_key: str = Field(description="Odoo API Key or account password.")
 
 class ConnectionIdParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier (empty uses active connection).")
@@ -19,7 +21,9 @@ class ConnectionRecord(BaseModel):
     id: str
     label: str
     masked_key: str
-    base_url: str
+    url: str
+    db: str
+    username: str
     is_active: bool
 
 class ConnectionList(BaseModel):
@@ -34,7 +38,7 @@ class DeleteResult(BaseModel):
 class ListCustomerParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
     limit: int = Field(default=50, description="Max records to return (1-100).")
-    cursor: str = Field(default="", description="Pagination cursor or page token.")
+    cursor: str = Field(default="", description="Pagination offset / cursor.")
 
 class GetCustomerParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -42,7 +46,7 @@ class GetCustomerParams(BaseModel):
 
 class CreateCustomerParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
+    name: str = Field(description="Name or title of the customer.")
     details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
 
 class UpdateCustomerParams(BaseModel):
@@ -68,7 +72,7 @@ class CustomerList(BaseModel):
 class ListInvoiceParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
     limit: int = Field(default=50, description="Max records to return (1-100).")
-    cursor: str = Field(default="", description="Pagination cursor or page token.")
+    cursor: str = Field(default="", description="Pagination offset / cursor.")
 
 class GetInvoiceParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -76,8 +80,9 @@ class GetInvoiceParams(BaseModel):
 
 class CreateInvoiceParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    customer_id: str = Field(description="Customer identifier.")
+    line_items: list[dict[str, Any]] = Field(default=[], description="Invoice line items.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Additional invoice fields.")
 
 class UpdateInvoiceParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -90,8 +95,9 @@ class DeleteInvoiceParams(BaseModel):
 
 class InvoiceRecord(BaseModel):
     id: str
-    name: str
-    status: str = "active"
+    customer_id: str
+    amount: float
+    status: str
     raw: dict[str, Any] = {}
 
 class InvoiceList(BaseModel):
@@ -102,7 +108,7 @@ class InvoiceList(BaseModel):
 class ListBillParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
     limit: int = Field(default=50, description="Max records to return (1-100).")
-    cursor: str = Field(default="", description="Pagination cursor or page token.")
+    cursor: str = Field(default="", description="Pagination offset / cursor.")
 
 class GetBillParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -110,8 +116,9 @@ class GetBillParams(BaseModel):
 
 class CreateBillParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    vendor_id: str = Field(description="Vendor identifier.")
+    line_items: list[dict[str, Any]] = Field(default=[], description="Bill line items.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Additional bill fields.")
 
 class UpdateBillParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -124,8 +131,9 @@ class DeleteBillParams(BaseModel):
 
 class BillRecord(BaseModel):
     id: str
-    name: str
-    status: str = "active"
+    vendor_id: str
+    amount: float
+    status: str
     raw: dict[str, Any] = {}
 
 class BillList(BaseModel):
@@ -136,7 +144,7 @@ class BillList(BaseModel):
 class ListPaymentParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
     limit: int = Field(default=50, description="Max records to return (1-100).")
-    cursor: str = Field(default="", description="Pagination cursor or page token.")
+    cursor: str = Field(default="", description="Pagination offset / cursor.")
 
 class GetPaymentParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -144,8 +152,9 @@ class GetPaymentParams(BaseModel):
 
 class CreatePaymentParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    customer_id: str = Field(description="Customer identifier.")
+    amount: float = Field(description="Payment amount.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Payment details.")
 
 class UpdatePaymentParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -158,8 +167,8 @@ class DeletePaymentParams(BaseModel):
 
 class PaymentRecord(BaseModel):
     id: str
-    name: str
-    status: str = "active"
+    customer_id: str
+    amount: float
     raw: dict[str, Any] = {}
 
 class PaymentList(BaseModel):
@@ -170,30 +179,30 @@ class PaymentList(BaseModel):
 class ListBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
     limit: int = Field(default=50, description="Max records to return (1-100).")
-    cursor: str = Field(default="", description="Pagination cursor or page token.")
+    cursor: str = Field(default="", description="Pagination offset / cursor.")
 
 class GetBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    bank_account_id: str = Field(description="Unique identifier of the bank_account.")
+    account_id: str = Field(description="Unique identifier of the bank account.")
 
 class CreateBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    name: str = Field(description="Bank account name.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Bank account details.")
 
 class UpdateBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    bank_account_id: str = Field(description="Unique identifier of the bank_account.")
+    account_id: str = Field(description="Unique identifier of the bank account.")
     fields: dict[str, Any] = Field(description="Attributes to update.")
 
 class DeleteBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    bank_account_id: str = Field(description="Unique identifier of the bank_account.")
+    account_id: str = Field(description="Unique identifier of the bank account.")
 
 class BankAccountRecord(BaseModel):
     id: str
     name: str
-    status: str = "active"
+    balance: float = 0.0
     raw: dict[str, Any] = {}
 
 class BankAccountList(BaseModel):
@@ -204,30 +213,31 @@ class BankAccountList(BaseModel):
 class ListTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
     limit: int = Field(default=50, description="Max records to return (1-100).")
-    cursor: str = Field(default="", description="Pagination cursor or page token.")
+    cursor: str = Field(default="", description="Pagination offset / cursor.")
 
 class GetTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    tax_rate_id: str = Field(description="Unique identifier of the tax_rate.")
+    tax_rate_id: str = Field(description="Unique identifier of the tax rate.")
 
 class CreateTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    name: str = Field(description="Tax rate name.")
+    rate: float = Field(description="Tax percentage rate.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Tax rate details.")
 
 class UpdateTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    tax_rate_id: str = Field(description="Unique identifier of the tax_rate.")
+    tax_rate_id: str = Field(description="Unique identifier of the tax rate.")
     fields: dict[str, Any] = Field(description="Attributes to update.")
 
 class DeleteTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    tax_rate_id: str = Field(description="Unique identifier of the tax_rate.")
+    tax_rate_id: str = Field(description="Unique identifier of the tax rate.")
 
 class TaxRateRecord(BaseModel):
     id: str
     name: str
-    status: str = "active"
+    rate: float = 0.0
     raw: dict[str, Any] = {}
 
 class TaxRateList(BaseModel):
@@ -236,11 +246,19 @@ class TaxRateList(BaseModel):
     next_cursor: Optional[str] = None
 
 class AuditAccountingHealthResult(BaseModel):
-    summary: str
-    metrics: dict[str, Any]
-    timestamp: str
+    status: str = "healthy"
+    total_customers: int = 0
+    total_invoices: int = 0
+    total_bills: int = 0
+    bank_accounts_count: int = 0
+    overdue_invoices_count: int = 0
+    overdue_bills_count: int = 0
+    summary: str = ""
 
 class GetCashFlowSummaryResult(BaseModel):
-    summary: str
-    metrics: dict[str, Any]
-    timestamp: str
+    total_receivables: float = 0.0
+    total_payables: float = 0.0
+    net_cash_flow: float = 0.0
+    currency: str = "EUR"
+    bank_accounts: list[dict[str, Any]] = []
+    summary: str = ""

@@ -14,7 +14,7 @@
   "tools": [
     {
       "name": "connect_odoo_accounting",
-      "description": "Connect Odoo Accounting account via credentials.",
+      "description": "Connect your own Odoo instance with URL, database name, username and API Key.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -25,23 +25,35 @@
         "properties": {
           "label": {
             "default": "",
-            "description": "Friendly connection label, e.g. Acme Odoo Accounting.",
+            "description": "Friendly connection label, e.g. Acme Odoo ERP.",
             "title": "Label",
             "type": "string"
           },
-          "api_key": {
-            "description": "Accounting API Key / OAuth Access Token.",
-            "title": "Api Key",
+          "url": {
+            "description": "Odoo instance URL (e.g. https://mycompany.odoo.com or self-hosted).",
+            "title": "Url",
             "type": "string"
           },
-          "base_url": {
-            "default": "",
-            "description": "Optional custom base URL or instance domain.",
-            "title": "Base Url",
+          "db": {
+            "description": "Odoo database name.",
+            "title": "Db",
+            "type": "string"
+          },
+          "username": {
+            "description": "Odoo user email or login.",
+            "title": "Username",
+            "type": "string"
+          },
+          "api_key": {
+            "description": "Odoo API Key or account password.",
+            "title": "Api Key",
             "type": "string"
           }
         },
         "required": [
+          "url",
+          "db",
+          "username",
           "api_key"
         ],
         "title": "ConnectParams",

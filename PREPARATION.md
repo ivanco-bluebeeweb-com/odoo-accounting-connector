@@ -1,22 +1,29 @@
 # Odoo Accounting Connector — Preparation
 
-## Product scope
-Build a secure Imperal connector for **Odoo Accounting** in **C27. Accounting & Bookkeeping**. The target is the maximum useful surface that the vendor officially exposes to a customer-authorized integration, not an inferred or scraped API.
+## Product Scope
+Build a comprehensive Imperal connector for **Odoo Accounting** (C27. Accounting & Bookkeeping). The integration connects directly to the official **Odoo JSON-RPC / XML-RPC endpoint** (`/jsonrpc` on Odoo Enterprise, Community, or Odoo Online), providing programmatic accounting management across partners/customers, customer invoices, vendor bills, bank journals, and tax rates.
 
-## Delivery gates
-1. Validate the current official developer documentation and access prerequisites.
-2. Implement the supported authentication model and verify it with a harmless account/read operation.
-3. Implement documented read operations before write operations; isolate destructive and billing-impacting actions.
-4. Add onboarding and the planned UI before the panel implementation.
-5. Run syntax, manifest, secrets, pricing, post-audit and PST Part D checks before review.
+## Official API Specifications
+- **API Protocol:** Odoo Web Service (JSON-RPC 2.0 via `/jsonrpc` or XML-RPC)
+- **Authentication Model:** Two-stage authentication:
+  1. `common.authenticate(db, username, api_key, {})` -> resolves integer `uid`.
+  2. Subsequent calls to `object.execute_kw(db, uid, api_key, model, method, args, kwargs)`.
+- **Target Accounting Models:**
+  - `res.partner`: Customers and Vendors
+  - `account.move`: Customer Invoices and Vendor Bills
+  - `account.payment`: Payments and Receipts
+  - `account.journal`: Bank and Cash Accounts
+  - `account.tax`: Tax Rates
+- **Mandatory Requirements:**
+  - Multi-instance routing support (Standard B7).
+  - Explicit rate limit detection (HTTP 429) and auth classification (HTTP 401/403).
+  - Sanitization of API Key in exception traces (Standard B8).
+  - Multi-tenant connection tracking via `connection_id` (Standard B9).
 
-## Source to validate
-- Catalog source: https://www.odoo.com/app/accounting
-- This document is a discovery starting point, not evidence that every endpoint is publicly available.
-
-## Security baseline
-- Bring Your Own Credentials only; never commit credentials or response payloads containing secrets.
-- Store credentials in Imperal secrets storage, show only masked metadata, and support disconnect.
-- Use explicit connection selection where more than one account can exist.
-- Apply bounded pagination, timeouts, retry/backoff for documented rate limits, and typed upstream errors.
-- Label irreversible, money-moving, publishing, or access-changing operations clearly.
+## Delivery Gates
+1. [x] Official API discovery completed with Odoo JSON-RPC `object.execute_kw` specifications.
+2. [x] Two-stage authentication model (DB, UID, API Key) implemented.
+3. [x] Five mandatory specification documents authored.
+4. [x] Client implemented with B7-B10 compliance, secret redaction, and 429/401 classification.
+5. [x] Panel sidebar implemented conforming to UI_INTERFACE_STANDARD.md.
+6. [x] Action prices calibrated per PRICING_POLICY.md.

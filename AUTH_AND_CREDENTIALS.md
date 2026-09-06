@@ -1,18 +1,16 @@
 # Odoo Accounting Connector — Authentication & Credentials
 
 ## Principle
-This connector uses customer-provided credentials and holds them only in Imperal encrypted secrets storage. The panel never displays saved secret values.
+Credentials are submitted through the secure connection sidebar and stored strictly inside Imperal encrypted secrets (`odoo_accounting_connections`). The API key is never exposed to LLM context or logs.
 
-## Authentication decision gate
-Before implementation, determine the officially supported model for Odoo Accounting:
-- **OAuth 2.0:** use authorization code + PKCE where supported; persist refresh metadata securely and handle re-consent.
-- **Service-to-service OAuth:** request only documented client credentials/scopes and validate with a harmless call.
-- **API token/key:** ask for the exact token plus required account/tenant/base URL only when the vendor requires them.
-- **Self-hosted/local:** require HTTPS base URL and validate ownership/connectivity without exposing credential material.
+## Credentials Required
+- **Odoo URL:** Base domain (e.g., `https://mycompany.odoo.com` or custom self-hosted URL).
+- **Database Name (`db`):** The Odoo PostgreSQL database identifier.
+- **Username / Login:** The email or username of an authorized accounting user.
+- **API Key:** User's personal API Key generated under *User Preferences > Account Security*.
 
-## Required UX behavior
-- Every credential input has a visible label and contextual placeholder.
-- Explain where the credential is obtained only in the help modal, not duplicated in the sidebar.
-- On connect, validate without mutating the provider account; on failure, return a safe actionable message.
-- Connection lists show label, provider identity/tenant where safe, health/reauthorization state, and masked identifiers.
-- Disconnect deletes only the locally stored Imperal credential.
+## Security Standards Applied
+- **B7 (Multi-Instance Routing):** Each connection stores its own instance URL and database.
+- **B8 (Secret Sanitization):** `_sanitize_msg` scrubs the API key from all error responses.
+- **B9 (Multi-Tenant Isolation):** Every resource handler accepts an optional `connection_id`.
+- **B10 (Granular Error Codes):** Returns structured codes `RATE_LIMITED`, `UNAUTHORIZED`, `NOT_FOUND`.

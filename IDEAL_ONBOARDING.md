@@ -1,15 +1,14 @@
-# Odoo Accounting Connector — Ideal Onboarding
+# Odoo Accounting Connector — Ideal Onboarding Guide
 
-## User outcome
-A user connects a Odoo Accounting account safely, immediately confirms the account that was connected, then starts with a useful read-only operational overview rather than a blank tool list.
+## Prerequisites
+1. An active Odoo instance (Odoo Online, Odoo.sh, or Self-Hosted).
+2. Installed **Invoicing** or **Accounting** module (`account`).
+3. An administrative or accounting user account.
 
-## Flow
-1. **Welcome:** explain the connector's verified capability categories and any vendor plan/admin prerequisite.
-2. **Connect:** collect only the credentials documented in `AUTH_AND_CREDENTIALS.md`; provide setup instructions in a modal.
-3. **Verify:** make one harmless identity, tenant, or health request and save a labeled connection only after success.
-4. **First value:** present a focused summary/audit action plus primary resource browsing.
-5. **Operate:** group actions by read, create/update, automation/webhooks and high-impact operations.
-6. **Recover:** show reconnect guidance for expired OAuth, revoked keys, unavailable roles, rate limiting or disabled API access.
-
-## Trust and safety
-High-impact writes always describe their provider-side effect. Destructive actions must use the platform's required confirmation behavior. No provider capability is implied until official discovery verifies it.
+## Step-by-Step Connection
+1. Log in to your Odoo web interface.
+2. Click your user avatar in the top right corner and open **Preferences**.
+3. Under the **Account Security** tab, locate **Developer API Keys** and click **New API Key**.
+4. Confirm your password and copy the generated key string.
+5. In the Imperal Cloud panel, enter your Odoo URL, Database name, Username, and API Key.
+6. Click **Connect Odoo** to verify the credentials and bind the connection.
