@@ -2584,6 +2584,11 @@
       "write_mode": "both",
       "max_bytes": 16384,
       "scope": "user"
+    },
+    {
+      "name": "odoo_accounting_connections",
+      "description": "Stored encrypted connections and credentials for odoo-accounting-connector",
+      "required": false
     }
   ]
 }
