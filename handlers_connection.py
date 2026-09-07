@@ -83,7 +83,7 @@ async def connect_odoo_accounting(ctx, params: ConnectParams) -> ActionResult[Co
         db=record["db"],
         username=record["username"],
         is_active=record["is_active"]
-    ))
+    ), summary="Odoo accounting connected.")
 
 @chat.function(
     "list_connections",

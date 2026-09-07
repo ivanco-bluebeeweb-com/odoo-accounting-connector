@@ -422,7 +422,7 @@ async def audit_accounting_health(ctx, params: ConnectionIdParams) -> ActionResu
         summary="Odoo Accounting Audit unpaid overdue invoices, open bills and reconciliation status",
         metrics={"status": "healthy", "scanned_at": now_iso, "alerts": 0},
         timestamp=now_iso
-    ))
+    ), summary="Accounting health audit ready.")
 
 @chat.function(
     "get_cash_flow_summary",
@@ -439,4 +439,4 @@ async def get_cash_flow_summary(ctx, params: ConnectionIdParams) -> ActionResult
         summary="Odoo Accounting One-glance summary of receivables, payables and cash balances",
         metrics={"status": "healthy", "scanned_at": now_iso, "alerts": 0},
         timestamp=now_iso
-    ))
+    ), summary="Cash flow summary retrieved.")
