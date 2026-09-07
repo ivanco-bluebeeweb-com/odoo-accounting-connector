@@ -75,7 +75,7 @@ async def connect_odoo_accounting(ctx, params: ConnectParams) -> ActionResult[Co
     }
     conns.append(record)
     await _save_connections(ctx, conns)
-    return ActionResult.ok(ConnectionRecord(
+    return ActionResult.success(ConnectionRecord(
         id=cid,
         label=record["label"],
         masked_key=record["masked_key"],
@@ -107,7 +107,7 @@ async def list_connections(ctx, params: NoParams) -> ActionResult[ConnectionList
         )
         for c in conns
     ]
-    return ActionResult.ok(ConnectionList(connections=records, total=len(records)))
+    return ActionResult.success(ConnectionList(connections=records, total=len(records)), summary="List connections completed successfully.")
 
 @chat.function(
     "disconnect_odoo_accounting",
@@ -137,4 +137,4 @@ async def disconnect_odoo_accounting(ctx, params: ConnectionIdParams) -> ActionR
     if new_conns and not any(c.get("is_active") for c in new_conns):
         new_conns[0]["is_active"] = True
     await _save_connections(ctx, new_conns)
-    return ActionResult.ok(DeleteResult(id=target, deleted=True, message=f"Connection {target} removed."))
+    return ActionResult.success(DeleteResult(id=target, deleted=True, message=f"Connection {target} removed."), summary="Disconnect odoo accounting completed successfully.")

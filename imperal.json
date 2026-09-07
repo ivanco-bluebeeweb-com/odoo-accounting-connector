@@ -2575,5 +2575,15 @@
       "audit_accounting_health": 40,
       "get_cash_flow_summary": 40
     }
-  }
+  },
+  "secrets": [
+    {
+      "name": "odoo_connections",
+      "description": "JSON array of connected odoo-accounting-connector accounts/credentials.",
+      "required": false,
+      "write_mode": "both",
+      "max_bytes": 16384,
+      "scope": "user"
+    }
+  ]
 }
