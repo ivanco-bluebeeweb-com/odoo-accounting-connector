@@ -92,7 +92,7 @@ async def list_invoices(ctx, params: ListInvoiceParams) -> ActionResult[InvoiceL
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.list_invoices(limit=params.limit, cursor=params.cursor)
-    items = [InvoiceRecord(id=str(it.get("id", "")), name=str(it.get("name", "")), status=str(it.get("status", "active")), raw=it) for it in data.get("items", [])]
+    items = [InvoiceRecord(id=str(it.get("id", "")), customer_id=str(it.get("customer_id", "")), amount=float(it.get("amount", it.get("amount_total", 0.0))), status=str(it.get("status", "active")), raw=it) for it in data.get("items", [])]
     return ActionResult.success(InvoiceList(items=items, total=data.get("total", len(items)), next_cursor=data.get("next_cursor")), summary="List invoices completed successfully.")
 
 @chat.function(
@@ -106,7 +106,7 @@ async def get_invoice(ctx, params: GetInvoiceParams) -> ActionResult[InvoiceReco
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.get_invoice(params.invoice_id)
-    return ActionResult.success(InvoiceRecord(id=str(data.get("id", params.invoice_id)), name=str(data.get("name", "")), status=str(data.get("status", "active")), raw=data), summary="Get invoice completed successfully.")
+    return ActionResult.success(InvoiceRecord(id=str(data.get("id", params.invoice_id)), customer_id=str(data.get("customer_id", "")), amount=float(data.get("amount", data.get("amount_total", 0.0))), status=str(data.get("status", "active")), raw=data), summary="Get invoice completed successfully.")
 
 @chat.function(
     "create_invoice",
@@ -118,8 +118,8 @@ async def create_invoice(ctx, params: CreateInvoiceParams) -> ActionResult[Invoi
     """Execute create invoice operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    data = await client.create_invoice(name=params.name, details=params.details)
-    return ActionResult.success(InvoiceRecord(id=str(data.get("id", "")), name=str(data.get("name", params.name)), status="active", raw=data), summary="Create invoice completed successfully.")
+    data = await client.create_invoice(customer_id=params.customer_id, line_items=params.line_items, details=params.details)
+    return ActionResult.success(InvoiceRecord(id=str(data.get("id", "")), customer_id=str(data.get("customer_id", params.customer_id)), amount=float(data.get("amount", data.get("amount_total", 0.0))), status="active", raw=data), summary="Create invoice completed successfully.")
 
 @chat.function(
     "update_invoice",
@@ -132,7 +132,7 @@ async def update_invoice(ctx, params: UpdateInvoiceParams) -> ActionResult[Invoi
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.update_invoice(params.invoice_id, params.fields)
-    return ActionResult.success(InvoiceRecord(id=params.invoice_id, name=str(data.get("name", "")), status="updated", raw=data), summary="Update invoice completed successfully.")
+    return ActionResult.success(InvoiceRecord(id=params.invoice_id, customer_id=str(data.get("customer_id", "")), amount=float(data.get("amount", data.get("amount_total", 0.0))), status="updated", raw=data), summary="Update invoice completed successfully.")
 
 @chat.function(
     "delete_invoice",
@@ -157,7 +157,7 @@ async def list_bills(ctx, params: ListBillParams) -> ActionResult[BillList]:
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.list_bills(limit=params.limit, cursor=params.cursor)
-    items = [BillRecord(id=str(it.get("id", "")), name=str(it.get("name", "")), status=str(it.get("status", "active")), raw=it) for it in data.get("items", [])]
+    items = [BillRecord(id=str(it.get("id", "")), vendor_id=str(it.get("vendor_id", "")), amount=float(it.get("amount", it.get("amount_total", 0.0))), status=str(it.get("status", "active")), raw=it) for it in data.get("items", [])]
     return ActionResult.success(BillList(items=items, total=data.get("total", len(items)), next_cursor=data.get("next_cursor")), summary="List bills completed successfully.")
 
 @chat.function(
@@ -171,7 +171,7 @@ async def get_bill(ctx, params: GetBillParams) -> ActionResult[BillRecord]:
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.get_bill(params.bill_id)
-    return ActionResult.success(BillRecord(id=str(data.get("id", params.bill_id)), name=str(data.get("name", "")), status=str(data.get("status", "active")), raw=data), summary="Get bill completed successfully.")
+    return ActionResult.success(BillRecord(id=str(data.get("id", params.bill_id)), vendor_id=str(data.get("vendor_id", "")), amount=float(data.get("amount", data.get("amount_total", 0.0))), status=str(data.get("status", "active")), raw=data), summary="Get bill completed successfully.")
 
 @chat.function(
     "create_bill",
@@ -183,8 +183,8 @@ async def create_bill(ctx, params: CreateBillParams) -> ActionResult[BillRecord]
     """Execute create bill operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    data = await client.create_bill(name=params.name, details=params.details)
-    return ActionResult.success(BillRecord(id=str(data.get("id", "")), name=str(data.get("name", params.name)), status="active", raw=data), summary="Create bill completed successfully.")
+    data = await client.create_bill(vendor_id=params.vendor_id, line_items=params.line_items, details=params.details)
+    return ActionResult.success(BillRecord(id=str(data.get("id", "")), vendor_id=str(data.get("vendor_id", params.vendor_id)), amount=float(data.get("amount", data.get("amount_total", 0.0))), status="active", raw=data), summary="Create bill completed successfully.")
 
 @chat.function(
     "update_bill",
@@ -197,7 +197,7 @@ async def update_bill(ctx, params: UpdateBillParams) -> ActionResult[BillRecord]
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.update_bill(params.bill_id, params.fields)
-    return ActionResult.success(BillRecord(id=params.bill_id, name=str(data.get("name", "")), status="updated", raw=data), summary="Update bill completed successfully.")
+    return ActionResult.success(BillRecord(id=params.bill_id, vendor_id=str(data.get("vendor_id", "")), amount=float(data.get("amount", data.get("amount_total", 0.0))), status="updated", raw=data), summary="Update bill completed successfully.")
 
 @chat.function(
     "delete_bill",
@@ -222,7 +222,7 @@ async def list_payments(ctx, params: ListPaymentParams) -> ActionResult[PaymentL
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.list_payments(limit=params.limit, cursor=params.cursor)
-    items = [PaymentRecord(id=str(it.get("id", "")), name=str(it.get("name", "")), status=str(it.get("status", "active")), raw=it) for it in data.get("items", [])]
+    items = [PaymentRecord(id=str(it.get("id", "")), customer_id=str(it.get("customer_id", "")), amount=float(it.get("amount", 0.0)), raw=it) for it in data.get("items", [])]
     return ActionResult.success(PaymentList(items=items, total=data.get("total", len(items)), next_cursor=data.get("next_cursor")), summary="List payments completed successfully.")
 
 @chat.function(
@@ -236,7 +236,7 @@ async def get_payment(ctx, params: GetPaymentParams) -> ActionResult[PaymentReco
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.get_payment(params.payment_id)
-    return ActionResult.success(PaymentRecord(id=str(data.get("id", params.payment_id)), name=str(data.get("name", "")), status=str(data.get("status", "active")), raw=data), summary="Get payment completed successfully.")
+    return ActionResult.success(PaymentRecord(id=str(data.get("id", params.payment_id)), customer_id=str(data.get("customer_id", "")), amount=float(data.get("amount", 0.0)), raw=data), summary="Get payment completed successfully.")
 
 @chat.function(
     "create_payment",
@@ -248,8 +248,8 @@ async def create_payment(ctx, params: CreatePaymentParams) -> ActionResult[Payme
     """Execute create payment operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    data = await client.create_payment(name=params.name, details=params.details)
-    return ActionResult.success(PaymentRecord(id=str(data.get("id", "")), name=str(data.get("name", params.name)), status="active", raw=data), summary="Create payment completed successfully.")
+    data = await client.create_payment(customer_id=params.customer_id, amount=params.amount, details=params.details)
+    return ActionResult.success(PaymentRecord(id=str(data.get("id", "")), customer_id=str(data.get("customer_id", params.customer_id)), amount=float(data.get("amount", params.amount)), raw=data), summary="Create payment completed successfully.")
 
 @chat.function(
     "update_payment",
@@ -262,7 +262,7 @@ async def update_payment(ctx, params: UpdatePaymentParams) -> ActionResult[Payme
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
     data = await client.update_payment(params.payment_id, params.fields)
-    return ActionResult.success(PaymentRecord(id=params.payment_id, name=str(data.get("name", "")), status="updated", raw=data), summary="Update payment completed successfully.")
+    return ActionResult.success(PaymentRecord(id=params.payment_id, customer_id=str(data.get("customer_id", "")), amount=float(data.get("amount", 0.0)), raw=data), summary="Update payment completed successfully.")
 
 @chat.function(
     "delete_payment",
@@ -300,8 +300,8 @@ async def get_bank_account(ctx, params: GetBankAccountParams) -> ActionResult[Ba
     """Execute get bank account operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    data = await client.get_bank_account(params.bank_account_id)
-    return ActionResult.success(BankAccountRecord(id=str(data.get("id", params.bank_account_id)), name=str(data.get("name", "")), status=str(data.get("status", "active")), raw=data), summary="Get bank account completed successfully.")
+    data = await client.get_bank_account(params.account_id)
+    return ActionResult.success(BankAccountRecord(id=str(data.get("id", params.account_id)), name=str(data.get("name", "")), status=str(data.get("status", "active")), raw=data), summary="Get bank account completed successfully.")
 
 @chat.function(
     "create_bank_account",
@@ -326,8 +326,8 @@ async def update_bank_account(ctx, params: UpdateBankAccountParams) -> ActionRes
     """Execute update bank account operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    data = await client.update_bank_account(params.bank_account_id, params.fields)
-    return ActionResult.success(BankAccountRecord(id=params.bank_account_id, name=str(data.get("name", "")), status="updated", raw=data), summary="Update bank account completed successfully.")
+    data = await client.update_bank_account(params.account_id, params.fields)
+    return ActionResult.success(BankAccountRecord(id=params.account_id, name=str(data.get("name", "")), status="updated", raw=data), summary="Update bank account completed successfully.")
 
 @chat.function(
     "delete_bank_account",
@@ -339,8 +339,8 @@ async def delete_bank_account(ctx, params: DeleteBankAccountParams) -> ActionRes
     """Execute delete bank account operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    ok = await client.delete_bank_account(params.bank_account_id)
-    return ActionResult.success(DeleteResult(id=params.bank_account_id, deleted=ok, message="bank_account deleted"), summary="Delete bank account completed successfully.")
+    ok = await client.delete_bank_account(params.account_id)
+    return ActionResult.success(DeleteResult(id=params.account_id, deleted=ok, message="bank_account deleted"), summary="Delete bank account completed successfully.")
 
 @chat.function(
     "list_tax_rates",
@@ -378,7 +378,7 @@ async def create_tax_rate(ctx, params: CreateTaxRateParams) -> ActionResult[TaxR
     """Execute create tax rate operation."""
     client, err = await _get_client(ctx, params.connection_id)
     if err: return err
-    data = await client.create_tax_rate(name=params.name, details=params.details)
+    data = await client.create_tax_rate(name=params.name, rate=params.rate, details=params.details)
     return ActionResult.success(TaxRateRecord(id=str(data.get("id", "")), name=str(data.get("name", params.name)), status="active", raw=data), summary="Create tax rate completed successfully.")
 
 @chat.function(
